@@ -64,7 +64,7 @@ st.markdown("""
         margin-bottom: 10px;
     }
     </style>
-""", unsafe_allowed_html=True)
+""", unsafe_allow_html=True)
 
 # 2. Header UI
 st.markdown("<h1 style='color: #FF0000; text-align: center;'>🎵 Moodify</h1>", unsafe_allowed_html=True)

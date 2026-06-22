@@ -1,12 +1,17 @@
 import streamlit as st
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from ytmusicapi import YTMusic
 from textblob import TextBlob
 
-# 1. Page Configuration & Spotify-like Dark Theme CSS
-st.set_page_config(page_title="Moodify", page_icon="🎵", layout="centered")
+# Initialize YouTube Music Client
+@st.cache_resource
+def get_yt_client():
+    return YTMusic()
 
-# Injecting Custom CSS to mimic Spotify's UI
+yt = get_yt_client()
+
+# 1. Page Configuration & Spotify-like Dark Theme CSS
+st.set_page_config(page_title="Moodify (YT Edition)", page_icon="🎵", layout="centered")
+
 st.markdown("""
     <style>
     /* Main app background and text color */
@@ -24,9 +29,9 @@ st.markdown("""
         padding-left: 20px !important;
     }
     
-    /* Green Spotify button styling */
+    /* Red YouTube Music button styling */
     .stButton>button {
-        background-color: #1DB954 !important;
+        background-color: #FF0000 !important;
         color: #FFFFFF !important;
         border-radius: 50px !important;
         border: none !important;
@@ -36,66 +41,44 @@ st.markdown("""
     }
     .stButton>button:hover {
         transform: scale(1.04);
-        background-color: #1ED760 !important;
+        background-color: #CC0000 !important;
     }
     
-    /* Custom Card container for songs */
-    .song-card {
+    /* Playlists Container Box */
+    .playlist-card {
         background-color: #181818;
         border-radius: 8px;
         padding: 15px;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
+        margin-bottom: 20px;
         border: 1px solid #282828;
-        transition: background-color 0.3s;
     }
-    .song-card:hover {
-        background-color: #282828;
-    }
-    
-    /* Text styling inside cards */
-    .song-title {
-        color: #FFFFFF !important;
+    .playlist-title {
+        color: #FF0000 !important;
         font-size: 18px !important;
         font-weight: bold;
         text-decoration: none;
     }
-    .song-title:hover {
-        text-decoration: underline;
-    }
-    .artist-name {
+    .playlist-meta {
         color: #B3B3B3;
         font-size: 14px;
-        margin-top: 4px;
+        margin-bottom: 10px;
     }
     </style>
 """, unsafe_allowed_html=True)
 
-# 2. Spotify API Setup
-CLIENT_ID = "YOUR_SPOTIFY_CLIENT_ID"
-CLIENT_SECRET = "YOUR_SPOTIFY_CLIENT_SECRET"
-
-try:
-    client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
-    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-except Exception as e:
-    st.error("Spotify Connection Error. Check your Client ID and Secret.")
-
-# 3. Header UI
-st.markdown("<h1 style='color: #1DB954; text-align: center;'>🎵 Moodify</h1>", unsafe_allowed_html=True)
-st.markdown("<p style='text-align: center; color: #B3B3B3;'>Your mood determines the soundtrack.</p>", unsafe_allowed_html=True)
+# 2. Header UI
+st.markdown("<h1 style='color: #FF0000; text-align: center;'>🎵 Moodify</h1>", unsafe_allowed_html=True)
+st.markdown("<p style='text-align: center; color: #B3B3B3;'>Powered completely free by YouTube Music</p>", unsafe_allowed_html=True)
 st.write("---")
 
-# 4. Input Area
+# 3. Input Area
 user_input = st.text_input("", placeholder="How are you feeling right now?")
 
-# Center the button using Streamlit columns
 col1, col2, col3 = st.columns([2, 1, 2])
 with col2:
-    submit_button = st.button("Get Tracks")
+    submit_button = st.button("Get Music")
 
-# 5. Logic Execution
+# 4. Logic Execution
 if submit_button:
     if user_input.strip() == "":
         st.warning("Please enter your mood first!")
@@ -104,45 +87,53 @@ if submit_button:
         analysis = TextBlob(user_input)
         polarity = analysis.sentiment.polarity
         
+        # Determine search keywords based on sentiment score
         if polarity < -0.1:
-            target_valence, target_energy = 0.2, 0.3
-            seed_genres = ['acoustic', 'sad', 'rainy-day']
-            status_msg = "💎 Playing something reflective and deep..."
+            search_query = "sad acoustic rainy day music playlist"
+            status_msg = "💎 Finding something reflective and comforting..."
         elif polarity > 0.1:
-            target_valence, target_energy = 0.8, 0.8
-            seed_genres = ['pop', 'dance', 'happy']
-            status_msg = "🔥 Boosting the vibes with high energy!"
+            search_query = "upbeat high energy party dance music playlist"
+            status_msg = "🔥 Finding something to boost the vibes!"
         else:
-            target_valence, target_energy = 0.5, 0.4
-            seed_genres = ['ambient', 'chill', 'lo-fi']
-            status_msg = "☕ Keeping it completely relaxed..."
+            search_query = "lofi chill ambient relaxed music playlist"
+            status_msg = "☕ Finding a relaxed, mellow soundtrack..."
             
-        st.markdown(f"<p style='color: #1DB954; font-weight: bold;'>{status_msg}</p>", unsafe_allowed_html=True)
+        st.markdown(f"<p style='color: #FF0000; font-weight: bold;'>{status_msg}</p>", unsafe_allowed_html=True)
         
-        # Fetching data from Spotify
+        # Fetching playlists from YouTube Music
         try:
-            results = sp.recommendations(seed_genres=seed_genres, target_valence=target_valence, target_energy=target_energy, limit=5)
+            # We filter specifically for community or official playlists matching the mood query
+            results = yt.search(search_query, filter="playlists", limit=3)
             
             st.write("") # Spacer
+            st.markdown("### 🎧 Curated Playlists for You:")
             
-            # Rendering Spotify-Style Custom HTML Cards
-            for track in results['tracks']:
-                track_name = track['name']
-                artist_name = track['artists'][0]['name']
-                track_url = track['external_urls']['spotify']
-                album_cover = track['album']['images'][0]['url'] if track['album']['images'] else "https://via.placeholder.com/80"
+            if not results:
+                st.info("No explicit playlists found. Try phrasing your mood slightly differently!")
+            
+            for playlist in results:
+                title = playlist.get('title', 'Mood Mix')
+                author = playlist.get('author', 'YouTube Music')
+                playlist_id = playlist.get('browseId')
                 
-                # HTML template mimicking Spotify track rows
-                card_html = f"""
-                <div class="song-card">
-                    <img src="{album_cover}" width="65" height="65" style="border-radius: 4px; margin-right: 20px;">
-                    <div>
-                        <a href="{track_url}" target="_blank" class="song-title">{track_name}</a>
-                        <div class="artist-name">{artist_name}</div>
-                    </div>
+                # Format standard web-playable URL
+                # YTMusic outputs browseIds starting with 'VL' or standard text formats
+                clean_id = playlist_id.replace('VL', '') if playlist_id.startswith('VL') else playlist_id
+                web_url = f"https://music.youtube.com/playlist?list={clean_id}"
+                embed_url = f"https://www.youtube.com/watch?v={clean_id}" # Used for local player
+                
+                # Render UI container card
+                st.markdown(f"""
+                <div class="playlist-card">
+                    <a href="{web_url}" target="_blank" class="playlist-title">📌 {title}</a>
+                    <div class="playlist-meta">Curated by {author}</div>
                 </div>
-                """
-                st.markdown(card_html, unsafe_allowed_html=True)
+                """, unsafe_allowed_html=True)
+                
+                # Dynamic Player Embed
+                # Streamlit automatically generates a media block if given a valid playlist link format
+                st.video(f"https://www.youtube.com/playlist?list={clean_id}")
+                st.write("---")
                 
         except Exception as e:
-            st.error(f"Error fetching music data: {e}")
+            st.error(f"Error fetching music: {e}")

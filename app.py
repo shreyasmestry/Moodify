@@ -3,7 +3,7 @@ from ytmusicapi import YTMusic
 from textblob import TextBlob
 
 # Initialize YouTube Music Client
-@st.cache_resourc
+@st.cache_resource
 def get_yt_client():
     return YTMusic()
 

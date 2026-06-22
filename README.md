@@ -31,12 +31,13 @@ Want to run Moodify on your own machine? It takes less than two minutes.
 ```bash
 git clone [https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git)
 cd YOUR_REPO_NAME
-2. Install Dependencies
+
+### 2. Install Dependencies
 Make sure you have Python 3.8+ installed, then run:
 
 Bash
 pip install -r requirements.txt
-3. Launch the App
+### 3. Launch the App
 Bash
 streamlit run app.py
 Your browser will automatically open to http://localhost:8501.

@@ -12,7 +12,7 @@ yt = get_yt_client()
 # 1. Page Configuration
 st.set_page_config(page_title="Moodify Pro", page_icon="⚡", layout="wide")
 
-# 2. Complete CSS Fixes (Resolves Contrast, Sizes, and the Hidden Box Layouts)
+# 2. Complete CSS Fixes
 st.markdown("""
     <style>
     /* Absolute global theme properties */
@@ -22,11 +22,21 @@ st.markdown("""
         font-family: "Circular Sp", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
     
-    /* FIX: Completely nukes the random massive black box container layout at top */
+    /* FIX: Completely nukes the random massive black box and elements */
     header, [data-testid="stHeader"], [data-testid="stToolbar"], #stDecoration {
         display: none !important;
         visibility: hidden !important;
         height: 0px !important;
+    }
+    
+    /* FIX: Forces Streamlit's inner main content container block to collapse its top gap */
+    [data-testid="stMainSpaceTrigger"] {
+        display: none !important;
+    }
+    
+    .stMainBlockContainer, [data-testid="stAppViewBlockContainer"] {
+        padding-top: 0px !important;
+        margin-top: 0px !important;
     }
     
     /* Custom Sidebar Left Panel Wrapper Overrides */
@@ -38,7 +48,7 @@ st.markdown("""
     /* Hide default streamlit navigational system layout elements */
     [data-testid="stSidebarNav"] { display: none; } 
 
-    /* FIX: Brightens the unselected navigation label radio buttons so they are NOT camouflaged */
+    /* Brightens the unselected navigation label radio buttons so they are NOT camouflaged */
     [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
         color: #E5E5E5 !important;
         font-size: 15px !important;
@@ -51,13 +61,13 @@ st.markdown("""
         color: #1DB954 !important;
     }
 
-    /* Main Content Area Container Adjustments */
+    /* Main Content Area Container Panel adjustments */
     .main-panel-box {
         background-color: #121212 !important;
         border-radius: 8px;
         padding: 30px;
         min-height: 90vh;
-        margin-top: -40px;
+        margin-top: 0px !important;
     }
 
     /* Spotify pill inputs */
@@ -118,10 +128,8 @@ st.markdown("""
 
 # ==================== NAVIGATION PANEL (SIDEBAR) ====================
 with st.sidebar:
-    # FIX: Made the site logo significantly bigger (font-size raised to 46px)
     st.markdown("<h1 style='color: #1DB954; padding: 15px 0px; font-size: 46px; font-weight: 900; margin-bottom: 10px;'>⚡ Moodify</h1>", unsafe_allow_html=True)
     
-    # Navigation Radio Selection Panel
     nav_option = st.radio(
         "Navigation",
         ["🧠 Mood AI", "🔍 Search Tracks/Movies", "🧑‍🎤 Artist Search", "🔥 Indian Trending"],
@@ -136,7 +144,6 @@ with st.sidebar:
 # ==================== MAIN PANEL WINDOW ====================
 st.markdown('<div class="main-panel-box">', unsafe_allow_html=True)
 
-# FIX: Title normalized directly to "Mood AI Dashboard" to prevent layout mismatch text
 if nav_option == "🧠 Mood AI":
     st.markdown("<h1 style='font-size: 32px; font-weight: 800;'>🧠 Mood AI Dashboard</h1>", unsafe_allow_html=True)
     user_input = st.text_input("How are you feeling right now?", key="mood_input", placeholder="What's your mood vibe?")
@@ -168,8 +175,6 @@ if nav_option == "🧠 Mood AI":
                     clean_id = playlist.get('browseId').replace('VL', '') if playlist.get('browseId').startswith('VL') else playlist.get('browseId')
                     
                     st.markdown(f'<div class="playlist-card"><a href="https://music.youtube.com/playlist?list={clean_id}" target="_blank" class="playlist-title">📌 {title}</a><div class="playlist-meta">Curated by {author}</div></div>', unsafe_allow_html=True)
-                    
-                    # FIX: Native standard video layout container embedding to keep playback on-page
                     st.video(f"https://www.youtube.com/watch?v=videoseries&list={clean_id}")
             except Exception as e:
                 st.error(f"Error: {e}")
@@ -189,7 +194,6 @@ elif nav_option == "🔍 Search Tracks/Movies":
                     
                     st.markdown(f'<div class="playlist-card"><span class="playlist-title">🎵 {song["title"]}</span><div class="playlist-meta">{artists} • {album}</div></div>', unsafe_allow_html=True)
                     if video_id:
-                        # FIX: Native player call forcing local iframe rendering
                         st.video(f"https://www.youtube.com/watch?v={video_id}")
             except Exception as e:
                 st.error(f"Error: {e}")

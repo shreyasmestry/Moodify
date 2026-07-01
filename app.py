@@ -12,7 +12,7 @@ yt = get_yt_client()
 # 1. Page Configuration
 st.set_page_config(page_title="Moodify Pro", page_icon="⚡", layout="wide")
 
-# 2. Hardcore CSS Reset (Collapses all structural wrapper blocks to 0)
+# 2. Refined Spotify Design Theme CSS
 st.markdown("""
     <style>
     /* Absolute global theme properties */
@@ -22,30 +22,17 @@ st.markdown("""
         font-family: "Circular Sp", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
     
-    /* 1. Nuke the native headers, decoration lines, and toolbars */
+    /* Safely hide header elements without breaking internal layouts */
     header, [data-testid="stHeader"], [data-testid="stToolbar"], #stDecoration {
-        display: none !important;
-        visibility: hidden !important;
-        height: 0px !important;
+        background-color: rgba(0, 0, 0, 0) !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
     
-    /* 2. Flatten all parent container elements and spacing triggers above our main box */
-    [data-testid="stMainSpaceTrigger"], 
-    .stMainBlockContainer > div:first-child,
-    [data-testid="stVerticalBlock"] > div:first-child {
-        display: none !important;
-        height: 0px !important;
-        margin: 0px !important;
-        padding: 0px !important;
-    }
-    
-    /* 3. Strip all top padding from the main wrapper pages completely */
-    .stMainBlockContainer, 
-    [data-testid="stAppViewBlockContainer"], 
-    .block-container {
-        padding-top: 0px !important;
-        margin-top: 0px !important;
-        padding-bottom: 0px !important;
+    /* Reset main page container default excessive top padding padding */
+    .stMainBlockContainer, [data-testid="stAppViewBlockContainer"], .block-container {
+        padding-top: 15px !important;
     }
     
     /* Custom Sidebar Left Panel Overrides */
@@ -69,13 +56,13 @@ st.markdown("""
         color: #1DB954 !important;
     }
 
-    /* Main Content Area Container Panel adjustments */
+    /* Main Content Area Panel - Pulls content up to overlap empty header padding safely */
     .main-panel-box {
         background-color: #121212 !important;
         border-radius: 8px;
         padding: 30px;
-        min-height: 95vh;
-        margin-top: 10px !important; /* Tiny margin just to keep it looking clean below the edge */
+        min-height: 88vh;
+        margin-top: -50px !important; /* Safely offsets the empty header gap */
     }
 
     /* Spotify pill inputs */

@@ -12,45 +12,50 @@ yt = get_yt_client()
 # 1. Page Configuration
 st.set_page_config(page_title="Moodify Pro", page_icon="⚡", layout="wide")
 
-# 2. Advanced Layout Override (Eliminates hidden top margins)
-# 2. Complete CSS Layout Fix
+# 2. Seamless Theme Fusion CSS (The Final Fix)
 st.markdown("""
     <style>
-    /* Absolute global theme properties */
-    .stApp {
-        background-color: #000000 !important;
+    /* THE UNIFIED BACKGROUND STRATEGY:
+       Instead of hiding blocks which causes Streamlit to recalculate layout spacing gaps,
+       we force EVERY layout layer in the application to use your core panel color (#121212).
+       This guarantees that unwanted black gaps or blocks vanish completely.
+    */
+    html, body, .stApp, 
+    [data-testid="stAppViewContainer"], 
+    [data-testid="stAppViewBlockContainer"], 
+    .block-container, 
+    [data-testid="stVerticalBlock"], 
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #121212 !important;
         color: #FFFFFF !important;
         font-family: "Circular Sp", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
+
+    /* Clean up the top layout spacing safely */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    /* Seamlessly blend the native header area background */
+    header, [data-testid="stHeader"], [data-testid="stToolbar"] {
+        background-color: rgba(0,0,0,0) !important;
+        background: transparent !important;
+        color: #FFFFFF !important;
+    }
     
-    /* 1. COMPLETELY REMOVE NATIVE HEADER BLOCKS */
-    header, [data-testid="stHeader"], [data-testid="stToolbar"], #stDecoration {
+    #stDecoration {
         display: none !important;
-        visibility: hidden !important;
-        height: 0px !important;
-        padding: 0px !important;
     }
-    
-    /* 2. ZERO OUT THE ROOT CONTENT PADDING AND GAP */
-    .block-container, [data-testid="stAppViewBlockContainer"] {
-        padding-top: 0rem !important;
-        padding-bottom: 0rem !important;
-        margin-top: 0px !important;
-    }
-    
-    [data-testid="stVerticalBlock"] {
-        gap: 0rem !important;
-    }
-    
-    /* Custom Sidebar Left Panel Wrapper Overrides */
+
+    /* Left Navigation Panel Styling Customizations */
     [data-testid="stSidebar"] {
         background-color: #000000 !important;
-        border-right: 1px solid #121212;
+        border-right: 1px solid #1c1c1c;
     }
-    
     [data-testid="stSidebarNav"] { display: none; } 
 
-    /* Brightens the unselected navigation label radio buttons so they are NOT camouflaged */
+    /* Brightens the unselected navigation label radio buttons */
     [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
         color: #E5E5E5 !important;
         font-size: 15px !important;
@@ -63,13 +68,9 @@ st.markdown("""
         color: #1DB954 !important;
     }
 
-    /* Main Content Area Container Panel adjustments */
+    /* Main Container layout settings */
     .main-panel-box {
-        background-color: #121212 !important;
-        border-radius: 8px;
-        padding: 30px;
-        min-height: 95vh;
-        margin-top: 15px !important; /* Clean visual spacing from top screen edge */
+        width: 100%;
     }
 
     /* Spotify pill inputs */
